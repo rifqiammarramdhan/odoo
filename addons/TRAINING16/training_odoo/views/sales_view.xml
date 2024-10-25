@@ -1,0 +1,39 @@
+<odoo>
+
+    <record id="instruktur_sales_view_form" model="ir.ui.view">
+        <field name="name">instruktur.res.partner.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="before">
+                <field name="company" />
+            </field>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="company" />
+            </xpath>
+            <!-- Jika ingin menambahkan didalam pages order_line -->
+            <xpath expr="//notebook/page[@name='order_lines']//field[@name='order_line']//tree/field[@name='name']" position="before">
+                <field name="test_line" />
+            </xpath>
+            <notebook position="inside">
+                <page string="Sessions">
+                    <group>
+                        <field name="company"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+
+ 
+    <record id="training_instructor_action" model="ir.actions.act_window">
+        <field name="name">salesOrder</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+ 
+</odoo>
+
+
+          

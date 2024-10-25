@@ -1,0 +1,32 @@
+<odoo>
+ 
+ 
+    <!-- Menu Dashboard -->
+    <menuitem id="menu_dashboard_training_odoo" name="Training Odoo" web_icon="training_odoo,static/description/icon.png"/>
+ 
+    <!-- Menu Bar Training -->
+    <menuitem id="menu_bar_training_odoo" name="Training" parent="menu_dashboard_training_odoo"/>
+    <!-- Menu Item -->
+    <menuitem id="menu_item_training_course" name="Course" parent="menu_bar_training_odoo" action="training_course_action"/>
+    <menuitem id="menu_item_training_session" name="Session" parent="menu_bar_training_odoo" action="training_session_action"/>
+ 
+    <!-- Menu Bar Konfigurasi -->
+    <menuitem id="menu_bar_configuration" name="Configuration" parent="menu_dashboard_training_odoo"/>
+    <!-- Menu Item -->
+    <menuitem id="menu_item_training_instructor" name="Instructor" parent="menu_bar_configuration" action="training_instructor_action"/>
+    <menuitem id="menu_item_training_attendee" name="Attendee" parent="menu_bar_configuration" action="training_attendee_action"/>
+    
+    <!-- Pada menu ini menggunakan action bawaan odoo -->
+    <menuitem id="menu_item_instructor_tags" name="Instructor Tags" parent="menu_bar_configuration" action="base.action_partner_category_form"/>
+    <!-- Mengambil Action dari Contact Tags: base.action_partner_category_form  -->
+     <!-- Harus mengambil dari edit actionya bukan edit viewnya -->
+    <menuitem id="menu_item_sales_tags" name="Sales Tags" parent="menu_bar_training_odoo" action="sales_team.sales_team_crm_tag_action"/>
+
+    <!-- Wizard -->
+    <menuitem id="menu_item_training_wizard" name="Add Attendees" parent="menu_bar_training_odoo" action="training_wizard_menu_list_action"/>
+
+    <!-- Wizard Cron Job -->
+    <menuitem id="menu_item_training_wizard_cron" name="Run Scheduler" parent="menu_bar_training_odoo" action="training_wizard_cron_action"/>
+
+    
+</odoo>

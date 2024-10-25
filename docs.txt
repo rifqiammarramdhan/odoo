@@ -1,0 +1,11 @@
+
+# Cara Cepat | Tanpa perlu upgrade module
+python16 'C:\odoo\odoo16\server/odoo-bin' -c 'C:\odoo\conf\odoo-training16.conf' -d TRAINING -u training_odoo
+
+
+scaffold:
+python16 'C:\odoo\odoo16\server/odoo-bin' scaffold -t default training_odoo C:\odoo\addons\TRAINING16\ 
+// python16 'C:\odoo\odoo16\server/odoo-bin' scaffold -t default ab_crm C:\Odoo\addons\
+
+
+

@@ -1,0 +1,3 @@
+python16 'C:\odoo\odoo16\server/odoo-bin' scaffold -t default travel_umroh C:\odoo\addons\TravelUmroh\
+
+python16 'C:\odoo\odoo16\server/odoo-bin' -c 'C:\odoo\conf\travel-umrah.conf' -d travel_umroh -u travel_umroh

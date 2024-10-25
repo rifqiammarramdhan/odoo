@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+  <data>
+     
+
+    <!-- Travel Package From -->
+    <record id="travel_package_view_form" model="ir.ui.view">
+      <field name="name">travel.umroh.travel.package.form</field>
+      <field name="model">travel.package</field>
+      <field name="arch" type="xml">
+          <form string="Travel Package">
+              <sheet>
+                  <group string="Informasi Jadwal">
+                        <group>
+                          <field name="tanggal_berangkat" string='Tanggal Berangkat' required='true'/>
+                        </group>
+                        <group>
+                          <field name="tanggal_kembali" string="Tanggal Kembali" required='true'/>
+                        </group>
+                  </group>
+                  <group string='Produk'>
+                      <group>
+                          <field name="sale_id" required='true'/>
+                      </group>
+                      <group>
+                        <field name="package_id" required='true'/>
+                      </group>
+                  </group>
+                  <group name="seat" string="Seats">
+                     <group>
+                        <field name="quota" required='true'/>
+                        <field name="remaining_quota" readonly='true' />
+                      </group>
+                      <group>
+                        <field name="quota_progress" widget="progressbar"/>
+                      </group>
+                  </group>           
+                  <notebook>
+                    <page  string="Hotel Lines">
+                      <field name="hotel_line" >
+                        <tree editable="top">
+                          <field name="partner_id" string="Nama Hotel" domain="[('is_hotel', '=', True)]" context="{'default_is_hotel': True}"/>
+                          <field name="date_check_in" string="Check In Hotel"/>
+                          <field name="date_check_out" string="Check Out Hotel"/>
+                          <field name="city" string="Kota"/>
+                        </tree>
+                      </field>
+                    </page>
+                    <page string="Airline Lines">
+                      <field name="airline_line" >
+                        <tree editable="top">
+                          <field name="partner_id" string="Nama Airline" domain="[('is_airlines', '=', True)]" context="{'default_is_airlines': True}" />
+                          <field name="tanggal_berangkat" string="Tanggal Berangkat"/>
+                          <field name="kota_asal" string="Kota Asal"/>
+                          <field name="kota_tujuan" string="Kota Tujuan"/>
+                        </tree>
+                      </field>
+                    </page>
+                    <page string="Schedule Lines">
+                      <field name="schedule_lines">
+                        <tree editable="top">
+                          <field name="nama_kegiatan" string="Nama Kegiatan" />
+                          <field name="tanggal_kegiatan" string="Tanggal Kegiatan"/>
+                        </tree>
+                      </field>
+                    </page>
+                    <!--
+                    <page string="Manifest">
+                      <field name="hotel_ids">
+                        <tree editable="top">
+                          <field name="name" string="Nama Hotel" />
+                          <field name="date_check_in" string="Check In Hotel"/>
+                          <field name="date_check_out" string="Check Out Hotel"/>
+                          <field name="city" readonly='true'/>
+                        </tree>
+                      </field>
+                    </page> -->
+                    <page string="HPP Lines">
+                      <field name="hpp_lines">
+                        <tree editable="top">
+                          <field name="barang_id" string="Nama Barang" />
+                          <field name="quantity" string="Quantity"/>
+                          <field name="units" string="Units"/>
+                          <field name="unit_price" string="Unit Price"/>
+                          <field name="subtotal" string="Subtotal"/>
+                        </tree>
+                      </field>
+                    </page> 
+                  </notebook>     
+              </sheet>
+          </form>
+      </field>
+    </record>
+    <!-- End Travel  -->
+
+
+
+
+
+    <!-- Actions -->
+    <record id="travel_umroh_travel_package_action" model="ir.actions.act_window">
+      <field name="name">TravelPackage</field>
+      <field name="res_model">travel.package</field>
+      <field name="view_mode">form</field>
+      <field name="help" type="html">
+          <p name="o_view_nocontent_smiling_face">
+              Travel Package 
+          </p>
+      </field>
+    </record>
+
+  </data>
+</odoo>
