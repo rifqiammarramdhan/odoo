@@ -16,6 +16,7 @@ class TravelPackage(models.Model):
     sale_id = fields.Many2one("product.product", string="Sale")
     product_ids = fields.Many2many("product.product", string="Products")
     mrp_bom_id = fields.Many2one("mrp.bom", string="Mrp Bom")
+    sale_order_id = fields.Many2one("sale.order", string="Sale Order")
 
     quota = fields.Integer("Quota")
     remaining_quota = fields.Integer(
@@ -91,8 +92,8 @@ class TravelPackage(models.Model):
 
     @api.onchange("mrp_bom_id")
     def _onchange_mrp_bom_id(self):
-        for line in self.hpp_lines:
-            line.unlink()  # Menghapus semua baris HPP sebelumnya
+        # for line in self.hpp_lines:
+        #     line.unlink()  # Menghapus semua baris HPP sebelumnya
 
         if self.mrp_bom_id:
             for bom_line in self.mrp_bom_id.bom_line_ids:
@@ -107,6 +108,68 @@ class TravelPackage(models.Model):
                         * bom_line.product_id.lst_price,
                     }
                 )
+
+    def func_update_jamaah(self):
+        # for line in self.manifest_ids:
+        #     line.unlink()
+
+        # Ambil semua jamaah berdasarkan sale_order_id
+        for rec in self:
+            lines = [(5, 0, 0)]
+            existing_jamaah = self.env["sale.order"].search(
+                [("travel_package_id", "=", self.id), ("state", "in", ["sale", "done"])]
+            )
+            if existing_jamaah:
+                for line in existing_jamaah.sale_order_ids:
+                    vals = {
+                        "title": line.title.name,
+                        "nama_panjang": line.name,
+                        "jenis_kelamin": line.jenis_kelamin,
+                        "no_ktp": line.no_ktp,
+                        "no_passport": line.no_passpor,
+                        "tanggal_lahir": line.tanggal_lahir,
+                        "tempat_lahir": line.tempat_lahir,
+                        "tanggal_berlaku": line.tanggal_berlaku,
+                        "tanggal_expired": line.tanggal_expired,
+                        "imigrasi": line.imigrasi,
+                        "tipe_kamar": line.tipe_kamar,
+                        "nama_passport": line.nama_passpor,
+                        "umur": line.umur,
+                        "mahrom_id": line.mahrom_id.id,
+                        "agent": line.agent,
+                    }
+                    lines.append((0, 0, vals))
+                rec.write({"manifest_ids": lines})
+
+            #     print("=================================>", line)
+            #     self.write(
+            #         {
+            #             "manifest_ids": [(5, 0, 0)]
+            #             + [
+            #                 (
+            #                     0,
+            #                     0,
+            #                     {
+            #                         "title": line.title.name,
+            #                         "nama_panjang": line.name,
+            #                         "jenis_kelamin": line.jenis_kelamin,
+            #                         "no_ktp": line.no_ktp,
+            #                         "no_passport": line.no_passpor,
+            #                         "tanggal_lahir": line.tanggal_lahir,
+            #                         "tempat_lahir": line.tempat_lahir,
+            #                         "tanggal_berlaku": line.tanggal_berlaku,
+            #                         "tanggal_expired": line.tanggal_expired,
+            #                         "imigrasi": line.imigrasi,
+            #                         "tipe_kamar": line.tipe_kamar,
+            #                         "nama_passport": line.nama_passpor,
+            #                         "umur": line.umur,
+            #                         "mahrom_id": line.mahrom_id.id,
+            #                         "agent": line.agent,
+            #                     },
+            #                 )
+            #             ]
+            #         }
+            #     )
 
     @api.depends("quota", "jamaah_ids")
     def compute_quota_progress(self):
@@ -182,8 +245,8 @@ class Manifest(models.Model):
     travel_package_id = fields.Many2one(
         "travel.package", string="Travel Package", ondelete="cascade"
     )
-
     sale_order_id = fields.Many2one("sale.order", string="Sale Order")
+
     title = fields.Char(string="Title")
     nama_panjang = fields.Char("nama_panjang")
     jenis_kelamin = fields.Char("jenis_kelamin")
@@ -193,11 +256,10 @@ class Manifest(models.Model):
     tempat_lahir = fields.Char("tempat_lahir")
     tanggal_berlaku = fields.Date("tanggal_berlaku")
     tanggal_expired = fields.Date("tanggal_expired")
-    imgirasi = fields.Char("imgirasi")
+    imigrasi = fields.Char("Imigrasi")
     nama_passport = fields.Char("nama_passport")
     tipe_kamar = fields.Char("tipe_kamar")
     umur = fields.Char("umur")
-    mahrom = fields.Many2one("res.partner", string="mahrom")
     agent = fields.Char("agent")
     notes = fields.Char("notes")
     mahrom_id = fields.Many2one("res.partner", string="Mahrom")
@@ -226,6 +288,31 @@ class HppLines(models.Model):
     subtotal = fields.Float("Subtotal")
 
 
+class PassporSaleOrder(models.Model):
+    _name = "passpor.sale.order"
+    _description = "Passpor Sale Order"
+
+    sale_order_id = fields.Many2one(
+        "sale.order", string="Sale Order", ondelete="cascade"
+    )
+
+    partner_id = fields.Many2one(
+        "res.partner", string="Partner", delegate=True, ondelete="cascade"
+    )
+
+    tipe_kamar = fields.Selection(
+        [
+            ("double", "Double"),
+            ("triple", "Triple"),
+            ("quad", "Quad"),
+        ]
+    )
+
+    mahrom_id = fields.Many2one("res.partner", string="Mahrom")
+    agent = fields.Char(string="Agent")
+    notes = fields.Char("notes")
+
+
 #  Sales Order
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -234,7 +321,12 @@ class SaleOrder(models.Model):
         "travel.package", string="Paket Perjalanan", ondelete="cascade"
     )
 
-    manifest_ids = fields.One2many("manifest", "sale_order_id", string="Manifest")
+    jamaah_id = fields.Many2one("res.partner", string="Jamaah", required=True)
+
+    # manifest_ids = fields.One2many("manifest", "sale_order_id", string="Manifest")
+    sale_order_ids = fields.One2many(
+        "passpor.sale.order", "sale_order_id", string="Sale Order"
+    )
 
     # Action untuk wizard
     def action_open_jamaah_wizard(self):

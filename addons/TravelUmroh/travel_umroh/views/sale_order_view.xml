@@ -16,22 +16,61 @@
                 <!-- Add Manifest Page -->
                 <xpath expr="//notebook/page[@name='customer_signature']" position="after">
                     <page string="Manifest">
-                        <field name="manifest_ids" context="{'open_jamaah_wizard': True}">
-                            <tree editable="bottom">
+                        <field name="sale_order_ids">
+                            <tree>
                                 <field name="title" string="Title"/>
-                                <field name="nama_panjang" string="Nama Panjang"/>
+                                <field name="name" string="Nama Panjang"/>
                                 <field name="jenis_kelamin" string="Jenis Kelamin"/>
                                 <field name="no_ktp" string="No. KTP"/>
-                                <field name="no_passport" string="No. Passport"/>
+                                <field name="no_passpor" string="No. Passport"/>
                                 <field name="tempat_lahir" string="Tempat Lahir"/>
                                 <field name="tanggal_berlaku" string="Tanggal Berlaku"/>
                                 <field name="tanggal_expired" string="Tanggal Expired"/>
-                                <field name="imgirasi" string="Imigrasi"/>
-                                <field name="tipe_kamar" string="Tipe Kamar"/>
+                                <field name="imigrasi" string="Imigrasi"/>
+                                <field name="tipe_kamar" string="Tipe Kamar" />
                                 <field name="umur" string="Umur"/>
-                                <field name="mahrom" string="Mahrom"/>
+                                <field name="mahrom_id" string="Mahrom"/>
                                 <field name="agent" string="Agent"/>
                             </tree>
+                            <form string="Create Passport Line">
+                                <group string="Personal">
+                                    <group>
+                                        <field name="title"/>
+                                        <field name="partner_id" string="Nama Jamaah"/>
+                                        <field name="tipe_kamar"/>
+                                        <field name="tanggal_lahir"/>
+                                    </group>
+                                    <group>
+                                        <field name="no_ktp"/>
+                                        <field name="mahrom_id"/>
+                                        <field name="umur"/>
+                                        <field name="tempat_lahir"/>
+                                    </group>    
+                                        
+                                </group>
+                                <group string="Passport Line">
+                                    <group> 
+                                        <field name="no_passpor"/>
+                                        <field name="tanggal_berlaku"/>
+                                        <field name="imigrasi"/>
+                                    </group>
+                                    <group>
+                                        <field name="nama_passpor"/>
+                                        <field name="tanggal_expired"/>
+                                        <field name="notes"/>    
+                                    </group>
+                                </group>
+                                <group string="Scan Document">
+                                    <group>
+                                        <field name="scan_passpor" widget="image"/>
+                                        <field name="scan_ktp" widget="image"/>
+                                    </group>
+                                    <group>    
+                                        <field name="scan_buku_nikah" widget="image"/>
+                                        <field name="scan_kartu_keluarga" widget="image"/>
+                                    </group>
+                                </group>           
+                             </form>
                         </field>
                     </page>
                 </xpath>

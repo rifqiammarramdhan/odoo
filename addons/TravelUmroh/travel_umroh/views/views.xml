@@ -12,6 +12,7 @@
             <header>
               <field name="status" widget="statusbar"/>
               <button type="object" name="func_confirm" string="Confirm"  class="oe_highlight"/>
+              <button type="object" name="func_update_jamaah" string="Update Jamaah"  class="oe_highlight"/>  
             </header>
               <sheet>
                 <div class="oe_title">
@@ -85,10 +86,10 @@
                           <field name="tempat_lahir" string="Tempat Lahir"/>
                           <field name="tanggal_berlaku" string="Tanggal Berlaku"/>
                           <field name="tanggal_expired" string="Tanggal Expired"/>
-                          <field name="imgirasi" string="Imigrasi"/>
+                          <field name="imigrasi" string="Imigrasi"/>
                           <field name="tipe_kamar" string="Tipe Kamar"/>
                           <field name="umur" string="Umur"/>
-                          <field name="mahrom" string="Mahrom"/>
+                          <field name="mahrom_id" string="Mahrom"/>
                           <field name="agent" string="Agent"/>
                         </tree>
                       </field>
