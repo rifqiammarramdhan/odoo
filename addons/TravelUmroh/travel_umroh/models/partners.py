@@ -8,6 +8,7 @@ class Partner(models.Model):
 
     # Additional Information
     no_ktp = fields.Char(string="No. KTP")
+    umur = fields.Integer(string="umur")
     nama_ayah = fields.Char(string="Nama Ayah")
     pekerjaan_ayah = fields.Char(string="Pekerjaan Ayah")
     tempat_lahir = fields.Char(string="Tempat Lahir")
@@ -52,6 +53,7 @@ class Partner(models.Model):
         ],
         string="Ukuran Baju",
     )
+    mahrom_ids = fields.One2many("manifest", "mahrom_id", string="Mahrom")
 
     # Passpor Information
     no_passpor = fields.Char(string="No. Paspor")

@@ -19,8 +19,11 @@
     # always loaded
     "data": [
         # 'security/ir.model.access.csv',
+        "views/sequence_data.xml",
         "views/views.xml",
         "views/partner_view.xml",
+        "views/sale_order_view.xml",
+        "wizard/manifest_wizard_view.xml",
         "views/templates.xml",
         "views/menuitems.xml",
     ],

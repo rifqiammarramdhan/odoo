@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <record id="view_sale_order_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form//header">
+                    <button name="action_open_jamaah_wizard" type="object" string="Tambah Jamaah" class="btn-primary"/>
+                </xpath>
+                <xpath expr="//form/sheet/group[@name='sale_header']/group[@name='partner_details']/field[@name='partner_id']" position="after">
+                    <field name="travel_package_id" string="Paket Perjalanan" domain="[('status', '=', 'confirm')]"/>
+                </xpath>
+                
+                <!-- Add Manifest Page -->
+                <xpath expr="//notebook/page[@name='customer_signature']" position="after">
+                    <page string="Manifest">
+                        <field name="manifest_ids" context="{'open_jamaah_wizard': True}">
+                            <tree editable="bottom">
+                                <field name="title" string="Title"/>
+                                <field name="nama_panjang" string="Nama Panjang"/>
+                                <field name="jenis_kelamin" string="Jenis Kelamin"/>
+                                <field name="no_ktp" string="No. KTP"/>
+                                <field name="no_passport" string="No. Passport"/>
+                                <field name="tempat_lahir" string="Tempat Lahir"/>
+                                <field name="tanggal_berlaku" string="Tanggal Berlaku"/>
+                                <field name="tanggal_expired" string="Tanggal Expired"/>
+                                <field name="imgirasi" string="Imigrasi"/>
+                                <field name="tipe_kamar" string="Tipe Kamar"/>
+                                <field name="umur" string="Umur"/>
+                                <field name="mahrom" string="Mahrom"/>
+                                <field name="agent" string="Agent"/>
+                            </tree>
+                        </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

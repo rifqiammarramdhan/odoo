@@ -1,15 +1,21 @@
 from odoo import _, api, fields, models
+import logging
+
+_logging = logging.getLogger(__name__)
 
 
 class TravelPackage(models.Model):
     _name = "travel.package"
-    _description = "TravelPackage"
+    _description = "Travel Package"
 
+    ref = fields.Char(string="Referensi", readonly=True, default="/")
+    name = fields.Char(string="PO Number", default="New", readonly=True)
     tanggal_berangkat = fields.Date("Tanggal Berangkat", required=True)
     tanggal_kembali = fields.Date("Tanggal Kembali", required=True)
 
     sale_id = fields.Many2one("product.product", string="Sale")
-    package_id = fields.Many2one("product.product", string="Package")
+    product_ids = fields.Many2many("product.product", string="Products")
+    mrp_bom_id = fields.Many2one("mrp.bom", string="Mrp Bom")
 
     quota = fields.Integer("Quota")
     remaining_quota = fields.Integer(
@@ -40,12 +46,67 @@ class TravelPackage(models.Model):
     schedule_lines = fields.One2many(
         "schedule.lines", "travel_package_id", string="Schedule Lines"
     )
-    hpp_lines = fields.One2many("hpp.lines", "travel_package_id", string="Hpp Lines")
+    hpp_lines = fields.One2many("hpp.lines", "travel_package_id", string="HPP Lines")
+    manifest_ids = fields.One2many("manifest", "travel_package_id", string="Manifest")
 
-    # @api.depends("jamaah_ids")
-    # def _compute_taken_seats(self):
-    #     for package in self:
-    #         package.taken_seats = len(package.jamaah_ids)
+    total_cost = fields.Float(
+        string="Total Cost", compute="_compute_total_cost", store=True
+    )
+
+    name = fields.Char(string="Package Name")
+    status = fields.Selection(
+        [
+            ("draft", "Draft"),
+            ("confirm", "Confirmed"),
+            ("cancel", "Cancelled"),
+        ],
+        string="Status",
+        default="draft",
+    )
+
+    def func_confirm(self):
+        if self.status == "draft":
+            self.name = f"{self.ref}-Umroh Bintang 5"
+            self.status = "confirm"
+
+    @api.onchange("ref")
+    def _onchange_mrp_bom_id(self):
+        if self.name == "New":
+            self.name = self.ref + "-" + "Umroh Bintang 5"
+
+    @api.model
+    def create(self, vals):
+        vals["ref"] = self.env["ir.sequence"].next_by_code("travel.package")
+        return super(TravelPackage, self).create(vals)
+
+    # Hitung Total
+    @api.depends("mrp_bom_id.bom_line_ids", "hpp_lines.subtotal")
+    def _compute_total_cost(self):
+        for package in self:
+            total = 0.0
+            if package.mrp_bom_id:
+                # Menghitung total dari hpp_lines yang terkait dengan mrp_bom_id
+                total += sum(line.subtotal for line in package.hpp_lines)
+            package.total_cost = total
+
+    @api.onchange("mrp_bom_id")
+    def _onchange_mrp_bom_id(self):
+        for line in self.hpp_lines:
+            line.unlink()  # Menghapus semua baris HPP sebelumnya
+
+        if self.mrp_bom_id:
+            for bom_line in self.mrp_bom_id.bom_line_ids:
+                self.hpp_lines.create(
+                    {
+                        "travel_package_id": self.id,
+                        "barang": bom_line.product_id.name,
+                        "quantity": bom_line.product_qty,
+                        "units": bom_line.product_uom_id.name,
+                        "unit_price": bom_line.product_id.lst_price,
+                        "subtotal": bom_line.product_qty
+                        * bom_line.product_id.lst_price,
+                    }
+                )
 
     @api.depends("quota", "jamaah_ids")
     def compute_quota_progress(self):
@@ -59,3 +120,154 @@ class TravelPackage(models.Model):
     def _compute_remaining_quota(self):
         for package in self:
             package.remaining_quota = package.quota - len(package.jamaah_ids)
+
+    # def name_get(self):
+    #     result = []
+    #     for record in self:
+    #         name = record.name or "Travel Package"
+    #         result.append((record.id, name))
+    #     return result
+
+
+# Hotel Line
+class HotelLine(models.Model):
+    _name = "hotel.line"
+    _description = "HotelLine"
+
+    travel_package_id = fields.Many2one(
+        "travel.package", string="Travel Package", ondelete="cascade"
+    )
+
+    partner_id = fields.Many2one("res.partner", string="Parner")
+    date_check_in = fields.Date(string="Check In Hotel")
+    date_check_out = fields.Date(string="Check Out Hotel")
+    city = fields.Char(string="Kota", related="partner_id.city")
+    is_hotel = fields.Boolean(string="Hotel")
+
+
+# Airline Lines
+class AirlineLine(models.Model):
+    _name = "airline.line"
+    _description = "Airline Line"
+
+    travel_package_id = fields.Many2one(
+        "travel.package", string="Travel Package", ondelete="cascade"
+    )
+
+    partner_id = fields.Many2one("res.partner", string="Parner")
+
+    tanggal_berangkat = fields.Date(string="Tanggal Berangkat")
+    kota_asal = fields.Char(string="Kota Asal")
+    kota_tujuan = fields.Char(string="Kota Tujuan")
+
+
+# Schedules Line
+class ScheduleLines(models.Model):
+    _name = "schedule.lines"
+    _description = "Schedule Lines"
+
+    travel_package_id = fields.Many2one(
+        "travel.package", string="Travel Package", ondelete="cascade"
+    )
+
+    nama_kegiatan = fields.Char("Nama Kegiatan")
+    tanggal_kegiatan = fields.Date("Tangal Kegiatan")
+
+
+# Manifest
+class Manifest(models.Model):
+    _name = "manifest"
+    _description = "Manifest"
+
+    travel_package_id = fields.Many2one(
+        "travel.package", string="Travel Package", ondelete="cascade"
+    )
+
+    sale_order_id = fields.Many2one("sale.order", string="Sale Order")
+    title = fields.Char(string="Title")
+    nama_panjang = fields.Char("nama_panjang")
+    jenis_kelamin = fields.Char("jenis_kelamin")
+    no_ktp = fields.Char("no_ktp")
+    no_passport = fields.Char("no_passport")
+    tanggal_lahir = fields.Date("tanggal_lahir")
+    tempat_lahir = fields.Char("tempat_lahir")
+    tanggal_berlaku = fields.Date("tanggal_berlaku")
+    tanggal_expired = fields.Date("tanggal_expired")
+    imgirasi = fields.Char("imgirasi")
+    nama_passport = fields.Char("nama_passport")
+    tipe_kamar = fields.Char("tipe_kamar")
+    umur = fields.Char("umur")
+    mahrom = fields.Many2one("res.partner", string="mahrom")
+    agent = fields.Char("agent")
+    notes = fields.Char("notes")
+    mahrom_id = fields.Many2one("res.partner", string="Mahrom")
+
+    scan_passpor = fields.Binary(string="Scan Paspor")
+    scan_ktp = fields.Binary(string="Scan KTP")
+    scan_buku_nikah = fields.Binary(string="Scan Buku Nikah")
+    scan_kartu_keluarga = fields.Binary(string="Scan Kartu Keluarga")
+
+
+# HPP Line
+class HppLines(models.Model):
+    _name = "hpp.lines"
+    _description = "HPP Lines"
+
+    travel_package_id = fields.Many2one(
+        "travel.package", string="Travel Package", ondelete="cascade"
+    )
+
+    mrp_bom_id = fields.Many2one("mrp.bom", string="BOM")
+
+    barang = fields.Char(string="Barang")
+    quantity = fields.Integer("Quantity")
+    units = fields.Char("Units")
+    unit_price = fields.Float("Unit Price")
+    subtotal = fields.Float("Subtotal")
+
+
+#  Sales Order
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+
+    travel_package_id = fields.Many2one(
+        "travel.package", string="Paket Perjalanan", ondelete="cascade"
+    )
+
+    manifest_ids = fields.One2many("manifest", "sale_order_id", string="Manifest")
+
+    # Action untuk wizard
+    def action_open_jamaah_wizard(self):
+        # Membuka wizard dengan otomatis mengisi `sale_order_id`
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Pilih Jamaah",
+            "res_model": "jamaah.wizard",
+            "view_mode": "form",
+            "target": "new",
+            "context": {
+                "default_sale_order_id": self.id,
+            },
+        }
+
+    @api.onchange("travel_package_id")
+    def _onchange_travel_package_id(self):
+        if self.travel_package_id:
+            product = self.travel_package_id.sale_id
+            if product:
+                # Clear existing order lines
+                self.order_line = [(5, 0, 0)]
+
+                # Create a new order line for the product in sale_id
+                self.order_line = [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_id": product.id,
+                            "name": product.name,
+                            "product_uom_qty": 1,
+                            "price_unit": product.lst_price,
+                        },
+                    )
+                ]

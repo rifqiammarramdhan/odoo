@@ -74,7 +74,7 @@
         id="menu_item_packet_sales_order_tags" 
         name="Sales Order" 
         parent="menu_bar_travel_umroh_transactions" 
-        action="mrp.mrp_bom_form_action"
+        action="sale.action_orders"
         />
 
         <menuitem

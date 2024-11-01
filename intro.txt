@@ -1,0 +1,22 @@
+
+instalasi odoo:
+-  Download source from odoo nightly
+- find latest .exe file
+- install normaly in windows
+- stop and disable autostart  odoo service in windows services (System Services) 
+- open odoo instalation folder:
+	- Add odoo Python to Envriontment Variable
+	- Add odoo Python/scripts to Envriontment Variable
+	- Add odoo Python/server to Envriontment Variable
+	- Add postgres \PostgreSQL\16\bin
+-  Make Directory in Home Folder name it "odoo"
+	- make odoo conf folder
+		- edit file .conf 
+		- make odoo conf folder in C:\odoo\conf\lentera.conf
+	- make odoo addons folder
+- Running Odoo
+
+	- 'C:\odoo\odoo16\server/odoo-bin' -c 'C:\odoo\conf\lentera.conf'
+
+	// - C:\Program Files\Odoo 16.0.20241011\server\odoo-bin' -c 'C:\odoo\conf\lentera.conf'
+	
